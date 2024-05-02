@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Bahnschtift";
+  src: url("../../public/fonts/ofont.ru_Bahnschrift.ttf") format("truetype");
+}
+
+body {
+  font-family: "Bahnschtift";
+  background-color: #d9decc;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
