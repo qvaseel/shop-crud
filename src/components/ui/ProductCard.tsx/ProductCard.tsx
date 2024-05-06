@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ROUTER } from "@/router/router.enum";
 import TitleProduct from "../Typography/TitleProduct/TitleProduct";
 import TextProduct from "../Typography/TextProduct/TextProduct";
-import { useState } from "react";
+import { useRouter } from 'next/navigation';
 import { ProductController } from "@/store/products";
 
 interface IProductCard {
@@ -22,7 +22,18 @@ const ProductCard = ({
   amount,
   _id,
 }: IProductCard) => {
-  const deleteProduct = async () => {
+  const router = useRouter();
+
+  const handleButtonClick = () => {
+    router.push(`${ROUTER.PRODUCT_UPDATE}/${_id}`);
+  };
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const deleteProduct = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     const result = window.confirm(
       "Вы уверены, что хотите удалить данные о товаре?"
     );
@@ -37,17 +48,15 @@ const ProductCard = ({
 
   return (
     <div
-      className={` w-[350px] max-[1220px]:w-[300px] max-[1020px]:w-[240px] bg-opacity-40 bg-white rounded-[10px] p-8 flex flex-col gap-3 mb-5 mx-auto`}
+      onClick={handleButtonClick}
+      
+      className={`cursor-pointer w-[350px] h-auto max-[1220px]:w-[300px] max-[1020px]:w-[240px] bg-opacity-40 bg-white rounded-[10px] p-8 flex flex-col gap-3 mb-5 mx-auto hover:bg-green-100 hover:bg-opacity-30 transition-all duration-300`}
     >
-      {imgUrl == undefined ? (
-        <div className="w-[286px] h-[286px] bg-gray-300 rounded-[10px]" />
-      ) : (
-        <img
+      <img
           className="w-[286px] object-contain bg-white rounded-[10px]"
           src={imgUrl}
           alt="product-image"
         />
-      )}
       <div>
         <div className="flex justify-between w-full">
           <TitleProduct>{`${title.substring(0, 19)}${
@@ -57,6 +66,7 @@ const ProductCard = ({
             <svg
               width="17"
               height="20"
+              className="hover:scale-125 transition-all duration-300"
               viewBox="0 0 17 20"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -79,9 +89,10 @@ const ProductCard = ({
       </div>
       <div className="flex justify-between items-center">
         <Link
-          href={`${ROUTER.PRODUCT_UPDATE}/${_id}`}
+          href={{ pathname: `${ROUTER.PRODUCT_UPDATE}/${_id}`, query: {  forShow: true } }}
           passHref
-          className="h-8 max-[1220px]:h-auto w-48 max-[1220px]:w-auto max-[1220px]:px-4  pt-[2px] max-[1220px]:py-1 text-center text-xl max-[1220px]:text-base max-[1020px]:text-xs max-[1020px]:text-[10px] text-white bg-[#374A3D] rounded-[10px]"
+          className="hover:scale-110 transition-all duration-300 h-8 max-[1220px]:h-auto w-48 max-[1220px]:w-auto max-[1220px]:px-4  pt-[2px] max-[1220px]:py-1 text-center text-xl max-[1220px]:text-base max-[1020px]:text-xs max-[1020px]:text-[10px] text-white bg-[#374A3D] rounded-[10px]"
+          onClick={handleLinkClick}
         >
           Редактировать
         </Link>
