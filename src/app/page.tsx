@@ -26,9 +26,9 @@ export default function Home() {
       <Header />
       <Menu isActive={isActive} onClick={() => setIsActive(!isActive)} />
       {isActive ? (
-        <Table fetching={fetching} productsArr={arr} />
+        !fetching && <Table fetching={fetching} productsArr={arr} />
       ) : (
-        <Cards productsArr={arr} />
+        !fetching && <Cards productsArr={arr} />
       )}
       <p className={`text-center text-4xl ${fetching ? "" : "hidden"}`}>
         Загрузка...
