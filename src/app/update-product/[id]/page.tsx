@@ -8,18 +8,22 @@ import { getOneProductFx, ProductController } from "@/store/products";
 import { useUnit } from "effector-react";
 import TitleProduct from "@/components/ui/Typography/TitleProduct/TitleProduct";
 import api from "@/api/api";
-import { isURL } from "@/helpers/isUrl";
-import { no_image } from "@/consts";
+import { no_image, api_url } from "@/consts";
+import { useSearchParams } from "next/navigation";
 
 
 const UpdateProduct = () => {
+  const searchParams = useSearchParams();
   const [amountValue, setAmountValue] = useState<number>(0);
   const [imageUrl, setImageUrl] = useState<string>(no_image);
   const [deleteImage, setDeleteImage] = useState<boolean>(false);
   const inputFileRef = useRef<HTMLInputElement | null>(null);
   const [inpValue, setInpValue] = useState<string>("");
   const [product, setProduct] = useState<ProductData | null>(null);
+  const [isUrl, setIsUrl] = useState<boolean>(true);
   const { id }: { id: any } = useParams()
+  const forShow = !Boolean(searchParams.get('forShow'));
+  const img = new Image();
 
   const products = useUnit({
     getProduct: getOneProductFx,
@@ -39,8 +43,8 @@ const UpdateProduct = () => {
       formData.append("image", file);
       const { data } = await api.post("/upload", formData);
       setInpValue("");
-      setImageUrl(`https://shop-server.up.railway.app${data.url}`);
-      setInpValue(imageUrl);
+      setImageUrl(`${api_url}${data.url}`);
+      setInpValue(`${api_url}${data.url}`);
       setDeleteImage(false);
     } catch (err) {
       console.warn(err);
@@ -52,6 +56,7 @@ const UpdateProduct = () => {
     setImageUrl(no_image);
     setDeleteImage(true);
     setInpValue("");
+    setIsUrl(true)
   };
 
   useEffect(() => {
@@ -64,22 +69,34 @@ const UpdateProduct = () => {
         setValue("category", productData.category);
         setValue("price", productData.price);
         setValue("amount", productData.amount);
+        setAmountValue(productData.amount)
         setImageUrl(productData.pictureUrl);
         if (productData.pictureUrl == no_image) {
           setDeleteImage(true);
+          setInpValue("");
+        } else {
+          setInpValue(productData.pictureUrl);
         }
-        setInpValue(imageUrl);
+        
       } catch (error) {
         console.error("Ошибка при получении данных продукта:", error);
       }
     };
 
     fetchData();
-  }, [id, products.getProduct, setValue]);
+  }, [id, products.getProduct, setValue, searchParams]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInpValue(event.target.value);
-    setImageUrl(event.target.value);
+    img.src = event.target.value;
+    img.onload = () => {
+      setImageUrl(event.target.value)
+      setIsUrl(true)
+    };
+    img.onerror = () => {
+      setImageUrl(no_image)
+      setIsUrl(false)
+    };
     setDeleteImage(false);
   };
 
@@ -101,7 +118,7 @@ const UpdateProduct = () => {
 
   return (
     <main className="">
-      <BackPanel type="Редактирование" />
+      <BackPanel type={forShow? "Страница просмотра" : "Редактирование товара"} />
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="max-w-7xl mx-auto flex gap-10 px-4 max-[910px]:gap-3 max-[630px]:flex-col"
@@ -119,7 +136,7 @@ const UpdateProduct = () => {
               <button
                 type="button"
                 onClick={() => inputFileRef.current?.click()}
-                className="text-lg text-[#E8EBE0] bg-[#374A3D] rounded-[10px] py-1 max-[910px]:text-base max-[910px]:px-1"
+                className={`text-lg text-[#E8EBE0] bg-[#374A3D] rounded-[10px] py-1 max-[910px]:text-base max-[910px]:px-1 ${forShow? "hidden" : ""}`}
               >
                 Загрузить изображение
               </button>
@@ -128,9 +145,10 @@ const UpdateProduct = () => {
                 type="file"
                 onChange={handleChangeFile}
                 className="hidden"
+                disabled={forShow}
               />
             </div>
-            <p className="text-lg max-[630px]:text-sm">
+            <p className={`text-lg max-[630px]:text-sm ${forShow? "hidden" : ""}`}>
               или вставьте URL, чтобы изменить изображение
             </p>
           </div>
@@ -138,14 +156,15 @@ const UpdateProduct = () => {
             className="pl-3 h-12 rounded-[10px] bg-white bg-opacity-40 text-base"
             value={inpValue}
             onChange={handleChange}
+            disabled={forShow}
           />
-          {!isURL(imageUrl) && !deleteImage && (
+          {!isUrl && (
             <p>Строка не является URL адресом!</p>
           )}
           <div className="flex flex-col gap-[8px]">
             {!deleteImage && (
               <button
-                className="text-lg text-[#E8EBE0] bg-[#374A3D] rounded-[10px] px-4 py-1 block mx-auto"
+                className={`text-lg text-[#E8EBE0] bg-[#374A3D] rounded-[10px] px-4 py-1 block mx-auto ${forShow? "hidden" : ""}`}
                 onClick={onClickRemoveImage}
               >
                 Удалить
@@ -161,6 +180,7 @@ const UpdateProduct = () => {
                 errors.title ? "border-red-800" : ""
               }`}
               {...register("title", { required: true })}
+              disabled={forShow}
             />
             {errors.title && <p>Заполните поле</p>}
           </div>
@@ -171,6 +191,7 @@ const UpdateProduct = () => {
                 errors.description ? "border-red-800" : ""
               }`}
               {...register("description", { required: true })}
+              disabled={forShow}
             />
             {errors.description && <p>Заполните поле</p>}
           </div>
@@ -181,6 +202,7 @@ const UpdateProduct = () => {
                 errors.category ? "border-red-800" : ""
               }`}
               {...register("category", { required: true })}
+              disabled={forShow}
             >
               <option value="Без категории">Без категории</option>
               <option value="Лиственные растения">Лиственные растения</option>
@@ -203,6 +225,7 @@ const UpdateProduct = () => {
               className="pl-3 h-12 rounded-[10px] bg-white bg-opacity-40 text-base"
               type="number"
               {...register("price", { required: true })}
+              disabled={forShow}
             />
             {errors.price && <p>Заполните поле</p>}
           </div>
@@ -215,6 +238,7 @@ const UpdateProduct = () => {
               type="number"
               onChange={handleChangeAmount}
               value={amountValue}
+              disabled={forShow}
             />
             <div className="flex justify-between w-full">
               <div className="">
@@ -223,14 +247,14 @@ const UpdateProduct = () => {
               <div className="flex gap-2 self-end">
                 <button
                   type="button"
-                  className="rounded-[10px] bg-[#374A3D] px-3 py-1 text-white"
+                  className={`rounded-[10px] bg-[#374A3D] px-3 py-1 text-white ${forShow? "hidden" : ""}`}
                   onClick={() => setAmountValue((prev) => (prev -= 1))}
                 >
                   -
                 </button>
                 <button
                   type="button"
-                  className="rounded-[10px] bg-[#374A3D] px-3 py-1 text-white"
+                  className={`rounded-[10px] bg-[#374A3D] px-3 py-1 text-white ${forShow? "hidden" : ""}`}
                   onClick={() => setAmountValue((prev) => (prev += 1))}
                 >
                   +
@@ -241,7 +265,7 @@ const UpdateProduct = () => {
           <input
             type="submit"
             value="Сохранить"
-            className="hover:cursor-pointer rounded-[10px] bg-[#374A3D] px-3 py-1 text-white text-lg mb-5"
+            className={`hover:cursor-pointer rounded-[10px] bg-[#374A3D] px-3 py-1 text-white text-lg mb-5 ${forShow? "hidden" : ""} `}
           />
         </div>
       </form>
