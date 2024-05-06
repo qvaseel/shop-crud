@@ -3,6 +3,7 @@ import { ROUTER } from "@/router/router.enum";
 import TitleProduct from "../Typography/TitleProduct/TitleProduct";
 import TextProduct from "../Typography/TextProduct/TextProduct";
 import { ProductController } from "@/store/products";
+import { useRouter } from 'next/navigation';
 
 interface IProductRow {
   imgUrl: any;
@@ -23,7 +24,18 @@ const ProductRow = ({
   price,
   _id,
 }: IProductRow) => {
-  const deleteProduct = async () => {
+  const router = useRouter();
+
+  const handleButtonClick = () => {
+    router.push(`${ROUTER.PRODUCT_UPDATE}/${_id}`);
+  };
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const deleteProduct = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     const result = window.confirm(
       "Вы уверены, что хотите удалить данные о товаре?"
     );
@@ -38,11 +50,12 @@ const ProductRow = ({
 
   return (
     <tr
-      className={`w-full h-[150px] max-[1050px]:h-auto bg-opacity-40 bg-white border-b-4 border-[#D9DECC]`}
+      onClick={handleButtonClick}
+      className={`cursor-pointer w-full h-[150px] max-[1050px]:h-auto bg-opacity-40 bg-white hover:bg-green-100 hover:bg-opacity-20 transition-all duration-300 border-b-4 border-[#D9DECC]`}
     >
-      <td className="w-[185px] p-[10px] max-[1050px]:p-3">
+      <td className="w-[185px]  p-[10px] max-[1050px]:p-3">
         <img
-          className="w-[185px] max-[1050px]:w-full object-contain bg-white rounded-[10px]"
+          className="w-[185px] max-h-[185px] max-[1050px]:w-full object-cover bg-white rounded-[10px]"
           src={imgUrl}
           alt="product-image"
         />
@@ -74,9 +87,9 @@ const ProductRow = ({
         </TitleProduct>
       </td>
       <td className="px-5 max-[1050px]:px-2 text-center">
-        <Link href={`${ROUTER.PRODUCT_UPDATE}/${_id}`} passHref>
+        <Link href={{ pathname: `${ROUTER.PRODUCT_UPDATE}/${_id}`, query: {  forShow: true } }} passHref onClick={handleLinkClick}>
           <svg
-            className="w-10 h-10 max-[1050px]:w-7 max-[1050px]:h-7 max-[630px]:w-4 max-[630px]:h-4"
+            className="w-10 h-10 max-[1050px]:w-7 max-[1050px]:h-7 max-[630px]:w-4 max-[630px]:h-4 hover:scale-125 transition-all duration-300"
             viewBox="0 0 41 41"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -91,7 +104,7 @@ const ProductRow = ({
       <td className="px-5 max-[1050px]:px-2 text-center">
         <button onClick={deleteProduct} className="w-auto cursor-pointer">
           <svg
-            className="w-10 h-10 max-[1050px]:w-7 max-[1050px]:h-7 max-[630px]:w-4 max-[630px]:h-4"
+            className="w-10 h-10 max-[1050px]:w-7 max-[1050px]:h-7 max-[630px]:w-4 max-[630px]:h-4 hover:scale-125 transition-all duration-300"
             viewBox="0 0 17 20"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
