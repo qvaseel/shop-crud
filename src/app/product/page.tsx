@@ -15,7 +15,7 @@ export default function Product() {
   const inputFileRef = useRef<HTMLInputElement | null>(null);
   const [inpValue, setInpValue] = useState<string>("");
   const [isUrl, setIsUrl] = useState<boolean>(true);
-  const img = new Image();
+  //const img = new Image();
 
   const {
     register,
@@ -48,17 +48,31 @@ export default function Product() {
   };
 
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    // setInpValue(event.target.value);
+    // img.src = event.target.value;
+    // img.onload = () => {
+    //   setImageUrl(event.target.value)
+    //   setIsUrl(true)
+    // };
+    // img.onerror = () => {
+    //   setImageUrl(no_image)
+    //   setIsUrl(false)
+    // };
+    // setIsFirstVsit(false);
     setInpValue(event.target.value);
-    img.src = event.target.value;
-    img.onload = () => {
-      setImageUrl(event.target.value)
-      setIsUrl(true)
+    const checkImageExists = async () => {
+      try {
+        const response = await fetch(event.target.value);
+        if (response.ok) {
+          setImageUrl(event.target.value);
+        } else {
+          setImageUrl(no_image);
+        }
+      } catch (error) {
+        setImageUrl(no_image);
+      }
     };
-    img.onerror = () => {
-      setImageUrl(no_image)
-      setIsUrl(false)
-    };
-    setIsFirstVsit(false);
+    checkImageExists();
   };
 
   const handleChangeAmount = (event: React.ChangeEvent<HTMLInputElement>) => {
