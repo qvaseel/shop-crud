@@ -1,18 +1,16 @@
 import { createStore, createEvent, createEffect } from "effector";
 import { ProductData } from "@/interface";
-import api from "@/api/api";
+import { getProducts, getOneProduct, addProduct, updateProduct, deleteProduct } from "@/api/apiRequests";
 
 export const $productsStore = createStore<ProductData[]>([]);
-export const addProduct = createEvent<ProductData>();
-export const getOneProduct = createEvent<ProductData>();
-export const getAllProducts = createEvent<ProductData[]>();
-export const deleteProduct = createEvent<ProductData>();
+export const addProductEv = createEvent<ProductData>();
+export const getOneProductEv = createEvent<ProductData>();
+export const getAllProductsEv = createEvent<ProductData[]>();
+export const deleteProductEv = createEvent<ProductData>();
 
 export const getProductsFx = createEffect(async (limit: number) => {
   try {
-    const response = await api.get(`/products?limit=${limit}`);
-
-    return response.data;
+    return await getProducts(limit);
   } catch (error) {
     throw error;
   }
@@ -20,8 +18,7 @@ export const getProductsFx = createEffect(async (limit: number) => {
 
 export const getOneProductFx = createEffect(async (id: any) => {
   try {
-    const response = await api.get(`/products/${id}`);
-    return response.data;
+    return await getOneProduct(id);
   } catch (error) {
     throw error;
   }
@@ -29,13 +26,7 @@ export const getOneProductFx = createEffect(async (id: any) => {
 
 export const addProductFx = createEffect(async (data: any) => {
   try {
-    const response = await api.post("/products", data);
-
-    if (response.status === 200) {
-      return data;
-    } else {
-      throw Error("Не удалось добавить данные о товаре");
-    }
+    return await addProduct(data);
   } catch (error) {
     throw error;
   }
@@ -43,12 +34,7 @@ export const addProductFx = createEffect(async (data: any) => {
 
 export const updateProductFx = createEffect(async (data: any) => {
   try {
-    const response = await api.put("/products", data);
-
-    if (response.status === 200) {
-    } else {
-      throw Error("Не удалось обновить данные о товаре");
-    }
+    updateProduct(data)
   } catch (error) {
     throw error;
   }
@@ -56,7 +42,7 @@ export const updateProductFx = createEffect(async (data: any) => {
 
 export const deleteProductFx = createEffect(async (id: any) => {
   try {
-    const response = await api.delete(`/products/${id}`);
+    deleteProduct(id)
   } catch (error) {
     throw error;
   }
@@ -66,8 +52,8 @@ const handleDeleteProduct = (products: ProductData[], _id: ProductData) =>
   products.filter((item) => item._id !== _id);
 
 $productsStore
-  .on(getAllProducts, (_, products) => products)
-  .on(addProduct, (state, newProduct) => [...state, newProduct])
+  .on(getAllProductsEv, (_, products) => products)
+  .on(addProductEv, (state, newProduct) => [...state, newProduct])
   .on(deleteProductFx, (state, deletedProduct) => [
     ...handleDeleteProduct(state, deletedProduct),
   ]);
@@ -75,7 +61,7 @@ $productsStore
 class ProductModel {
   public static async getAllProducts(limit: number) {
     const AllProductsData = await getProductsFx(limit);
-    getAllProducts(AllProductsData);
+    getAllProductsEv(AllProductsData);
   }
 
   public static addProduct(DataProduct: ProductData) {
