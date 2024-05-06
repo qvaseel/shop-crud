@@ -62,7 +62,7 @@ export default function Product() {
     setInpValue(event.target.value);
     const checkImageExists = async () => {
       try {
-        const response = await fetch(event.target.value);
+        const response = await fetch(event.target.value, { method: 'HEAD' });
         if (response.ok) {
           setImageUrl(event.target.value);
         } else {
