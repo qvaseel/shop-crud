@@ -7,14 +7,12 @@ interface ITable {
   fetching: boolean;
 }
 
-const Table = ({ productsArr, fetching }: ITable) => {
+const Table = ({ productsArr }: ITable) => {
   return (
     <div>
       <table className="max-w-7xl block mx-auto px-4 ">
         <thead
-          className={`bg-opacity-40 bg-white border-b-4 border-[#D9DECC] ${
-            !fetching ? "" : "hidden"
-          }`}
+          className={`bg-opacity-40 bg-white border-b-4 border-[#D9DECC]`}
         >
           <tr>
             <td className="text-center">
