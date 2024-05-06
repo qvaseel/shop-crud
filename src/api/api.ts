@@ -1,7 +1,8 @@
 import axios from "axios";
+import { api_url } from "@/consts";
 
 const api = axios.create({
-  baseURL: "https://shop-server.up.railway.app",
+  baseURL: api_url,
 });
 
 export default api;
