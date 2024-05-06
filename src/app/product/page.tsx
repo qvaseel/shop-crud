@@ -6,8 +6,7 @@ import TitleProduct from "@/components/ui/Typography/TitleProduct/TitleProduct";
 import { useRef, useState } from "react";
 import api from "@/api/api";
 import { ProductController } from "@/store/products";
-import { isURL } from "@/helpers/isUrl";
-import { no_image } from "@/consts";
+import { no_image, api_url } from "@/consts";
 
 export default function Product() {
   const [amountValue, setAmountValue] = useState<number>(0);
@@ -15,6 +14,8 @@ export default function Product() {
   const [isFirstVisit, setIsFirstVsit] = useState<boolean>(true);
   const inputFileRef = useRef<HTMLInputElement | null>(null);
   const [inpValue, setInpValue] = useState<string>("");
+  const [isUrl, setIsUrl] = useState<boolean>(true);
+  const img = new Image();
 
   const {
     register,
@@ -30,8 +31,9 @@ export default function Product() {
       formData.append("image", file);
       const { data } = await api.post("/upload", formData);
       setInpValue("");
-      setImageUrl(`https://shop-server.up.railway.app${data.url}`);
-      setInpValue(imageUrl);
+      setImageUrl(`${api_url}${data.url}`);
+      setInpValue(`${api_url}${data.url}`);
+      setIsUrl(true)
     } catch (err) {
       console.warn(err);
       alert("Ошибка при загрузке файла!");
@@ -42,11 +44,20 @@ export default function Product() {
     setImageUrl("");
     setInpValue("");
     setIsFirstVsit(true);
+    setIsUrl(true)
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setInpValue(event.target.value);
-    setImageUrl(event.target.value);
+    img.src = event.target.value;
+    img.onload = () => {
+      setImageUrl(event.target.value)
+      setIsUrl(true)
+    };
+    img.onerror = () => {
+      setImageUrl(no_image)
+      setIsUrl(false)
+    };
     setIsFirstVsit(false);
   };
 
@@ -77,7 +88,7 @@ export default function Product() {
             <img
               className="w-[520px] h-[520px] max-[910px]:w-[320px] max-[910px]:h-[320px] max-[710px]:w-[170px] max-[710px]:h-[170px] object-cover"
               src={isFirstVisit ? `${no_image}` : `${imageUrl}`}
-              alt="Изобржения по такому URL-адресу не существует"
+              alt="Изображения по такому URL-адресу не существует"
             />
           </div>
           <div className="flex w-full gap-4 items-center max-[710px]:flex-col">
@@ -105,7 +116,9 @@ export default function Product() {
             value={inpValue}
             onChange={handleChange}
           />
-          {!isURL(imageUrl) && <p>Строка не является URL адресом!</p>}
+          {!isUrl && (
+            <p>Строка не является URL адресом!</p>
+          )}
           <div className="flex flex-col gap-[8px]">
             {!isFirstVisit && (
               <button
