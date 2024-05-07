@@ -14,6 +14,7 @@ import { useSearchParams } from "next/navigation";
 
 const UpdateProduct = () => {
   const searchParams = useSearchParams();
+  const [imageExists, setImageExists] = useState<boolean>(true);
   const [amountValue, setAmountValue] = useState<number>(0);
   const [imageUrl, setImageUrl] = useState<string>(no_image);
   const [deleteImage, setDeleteImage] = useState<boolean>(false);
@@ -23,7 +24,6 @@ const UpdateProduct = () => {
   const [isUrl, setIsUrl] = useState<boolean>(true);
   const { id }: { id: any } = useParams()
   const forShow = !Boolean(searchParams.get('forShow'));
-  //const img = new Image();
 
   const products = useUnit({
     getProduct: getOneProductFx,
@@ -87,31 +87,25 @@ const UpdateProduct = () => {
   }, [id, products.getProduct, setValue, searchParams]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // setInpValue(event.target.value);
-    // img.src = event.target.value;
-    // img.onload = () => {
-    //   setImageUrl(event.target.value)
-    //   setIsUrl(true)
-    // };
-    // img.onerror = () => {
-    //   setImageUrl(no_image)
-    //   setIsUrl(false)
-    // };
-    // setIsFirstVsit(false);
     setInpValue(event.target.value);
-    const checkImageExists = async () => {
-      try {
-        const response = await fetch(event.target.value);
-        if (response.ok) {
-          setImageUrl(event.target.value);
-        } else {
-          setImageUrl(no_image);
-        }
-      } catch (error) {
-        setImageUrl(no_image);
-      }
-    };
-    checkImageExists();
+    if (imageExists) {
+      setImageUrl(event.target.value)
+      setIsUrl(true)
+    } else {
+      setImageUrl(no_image)
+      setIsUrl(false)
+    }
+    setDeleteImage(false);
+  };
+
+  const handleImageLoad = () => {
+    setImageExists(true);
+  };
+
+  const handleImageError = () => {
+    setImageExists(false);
+    setImageUrl(no_image)
+    setIsUrl(false)
   };
 
   const handleChangeAmount = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,6 +134,8 @@ const UpdateProduct = () => {
         <div className="flex flex-col gap-4">
           <div className="w-[520px] h-[520px] mx-auto block max-[910px]:w-[320px] max-[910px]:h-[320px] max-[710px]:w-[170px] max-[710px]:h-[170px]">
             <img
+              onLoad={handleImageLoad}
+              onError={handleImageError}
               className="w-[520px] h-[520px] object-cover max-[910px]:w-[320px] max-[910px]:h-[320px] max-[710px]:w-[170px] max-[710px]:h-[170px]"
               src={imageUrl}
               alt="Изобржения по такому URL-адресу не существует"
