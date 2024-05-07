@@ -15,7 +15,7 @@ export default function Product() {
   const inputFileRef = useRef<HTMLInputElement | null>(null);
   const [inpValue, setInpValue] = useState<string>("");
   const [isUrl, setIsUrl] = useState<boolean>(true);
-  //const img = new Image();
+  const [imageExists, setImageExists] = useState<boolean>(true);
 
   const {
     register,
@@ -47,32 +47,26 @@ export default function Product() {
     setIsUrl(true)
   };
 
-  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    // setInpValue(event.target.value);
-    // img.src = event.target.value;
-    // img.onload = () => {
-    //   setImageUrl(event.target.value)
-    //   setIsUrl(true)
-    // };
-    // img.onerror = () => {
-    //   setImageUrl(no_image)
-    //   setIsUrl(false)
-    // };
-    // setIsFirstVsit(false);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInpValue(event.target.value);
-    const checkImageExists = async () => {
-      try {
-        const response = await fetch(event.target.value, { method: 'HEAD' });
-        if (response.ok) {
-          setImageUrl(event.target.value);
-        } else {
-          setImageUrl(no_image);
-        }
-      } catch (error) {
-        setImageUrl(no_image);
-      }
-    };
-    checkImageExists();
+    if (imageExists) {
+      setImageUrl(event.target.value)
+      setIsUrl(true)
+    } else {
+      setImageUrl(no_image)
+      setIsUrl(false)
+    }
+    setIsFirstVsit(false);
+  };
+
+  const handleImageLoad = () => {
+    setImageExists(true);
+  };
+
+  const handleImageError = () => {
+    setImageExists(false);
+    setImageUrl(no_image)
+    setIsUrl(false)
   };
 
   const handleChangeAmount = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,6 +94,8 @@ export default function Product() {
         <div className="flex flex-col gap-4">
           <div className="w-[520px] h-[520px] mx-auto block max-[910px]:w-[320px] max-[910px]:h-[320px] max-[710px]:w-[170px] max-[710px]:h-[170px]">
             <img
+              onLoad={handleImageLoad}
+              onError={handleImageError}
               className="w-[520px] h-[520px] max-[910px]:w-[320px] max-[910px]:h-[320px] max-[710px]:w-[170px] max-[710px]:h-[170px] object-cover"
               src={isFirstVisit ? `${no_image}` : `${imageUrl}`}
               alt="Изображения по такому URL-адресу не существует"
