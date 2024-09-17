@@ -1,1 +1,1 @@
-# sho-crud
+# shoз-crud
